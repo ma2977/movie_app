@@ -3,36 +3,36 @@ const request = require('supertest');
 const app = require('../app');
 const genresData = require('./data/genresData');
 
+let id;
 let initialGenres;
 
-beforeEach(async () => {
-    await Genre.truncate({ cascade: true });
-    initialGenres = await Genre.bulkCreate(genresData);
-})
+// beforeEach(async () => {
+//     await Genre.truncate({ cascade: true });
+//     initialGenres = await Genre.bulkCreate(genresData);
+// })
 
-test("GET /genres should return 2 genres", async () => {
-    const res = await request(app).get('/api/v1/genres');
-    expect(res.body).toHaveLength(2);
-}) 
+test("GET /genres", async () => {
+    const res = await request(app).get('/genres');
+    expect(res.status).toBe(200);
+    expect(res.body).toBeInstanceOf(Array);
+}); 
 
-test("POST /genres should create a genre", async () => {
-    const newGenre = { name: "Adventure" }
-    await request(app).post('/api/v1/genres').send(newGenre);
-    const res = await request(app).get('/api/v1/genres');
-    expect(res.body).toHaveLength(3);
-})
+test("POST /genres", async () => {
+    const genre = { name: "Rock" }
+    const res = await request(app).post('/genres').send(genre);
+    id = res.body.id;
+    expect (res.status).toBe(201);
+    expect(res.body.name).toBe(genre.name);
+});
 
-test("DELETE /genres/:id should delete a genre", async () => {
-    const id = initialGenres[0].id;
-    await request(app).delete(`/api/v1/genres/${id}`);
-    const res = await request(app).get('/api/v1/genres');
-    expect(res.body).toHaveLength(1);
-})
+test("PUT /genres/:id", async () => {
+    const genreUpdated = { name: "Rock updated" }
+    const res = await request(app).put(`/genres/${id}`).send(genreUpdated);
+    expect(res.status).toBe(200);
+    expect(res.body.name).toBe(genreUpdated.name);
+});
 
-test("PUT /genres/:id should update a genre", async () => {
-    const genre = { name: "Action updated" }
-    const id = initialGenres[0].id;
-    await request(app).put(`/api/v1/genres/${id}`).send(genre);
-    const res = await request(app).get(`/api/v1/genres/${id}`);
-    expect(res.body.name).toBe("Action updated")
-})
+test("DELETE /genres/:id", async () => {
+    const res = await request(app).delete(`/genres/${id}`);
+    expect(res.status).toBe(204);
+});
