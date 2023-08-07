@@ -12,4 +12,7 @@ actorRouter.route('/:id')
     .delete(remove)
     .put(update);
 
+actorRouter.route('/:id/genres')
+    .post(setArtistGenres);
+
 module.exports = actorRouter;
